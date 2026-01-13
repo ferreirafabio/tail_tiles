@@ -242,6 +242,10 @@ def run_viewer(filepaths: list[str], layout: tuple[int, int], initial_lines: int
                     tile.update()
                 redraw = True
             elif key == curses.KEY_RESIZE:
+                # Handle terminal resize properly
+                curses.endwin()
+                stdscr.refresh()
+                stdscr.clear()
                 redraw = True
 
             if redraw:
