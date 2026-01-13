@@ -92,6 +92,7 @@ Start a new session and pick a layout:
 - **Tab completion** - Auto-complete file paths when entering
 - **Live updates** - Polls files for changes (100ms interval)
 - **Flexible layouts** - Single, vertical split, horizontal split, or 2×2 grid
+- **Terminal resizing** - Automatically adapts to window size changes
 - **Clean UI** - Minimalistic curses interface with unicode box-drawing
 
 ## Running without install
