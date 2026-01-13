@@ -222,15 +222,19 @@ def run_viewer(filepaths: list[str], layout: tuple[int, int], initial_lines: int
             tile.update()
 
         redraw = True
-        last_size = stdscr.getmaxyx()
+        last_size = os.get_terminal_size()
 
         while True:
-            # Check for terminal resize (polling fallback)
-            current_size = stdscr.getmaxyx()
-            if current_size != last_size:
-                last_size = current_size
-                stdscr.erase()
-                redraw = True
+            # Check for terminal resize (polling via OS)
+            try:
+                current_size = os.get_terminal_size()
+                if current_size != last_size:
+                    last_size = current_size
+                    curses.resizeterm(current_size.lines, current_size.columns)
+                    stdscr.clear()
+                    redraw = True
+            except OSError:
+                pass
 
             for tile in tiles:
                 if tile.update():
