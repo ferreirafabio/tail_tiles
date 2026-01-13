@@ -4,7 +4,7 @@
 [![PyPI Version](https://img.shields.io/pypi/v/tail-tiles)](https://pypi.org/project/tail-tiles/)
 [![GitHub Stars](https://img.shields.io/github/stars/ferreirafabio/tail_tiles)](https://github.com/ferreirafabio/tail_tiles/stargazers)
 
-![tail_tiles logo](tail_tiles.png)
+<img src="tail_tiles.png" alt="tail_tiles logo" width="70%">
 
 > Multi-tile tail viewer for terminal in <200 lines of code
 
