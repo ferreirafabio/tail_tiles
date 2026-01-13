@@ -1,4 +1,4 @@
-# tail_tiles
+# Tail-Tiles
 
 ![tail_tiles logo](tail_tiles.png)
 
