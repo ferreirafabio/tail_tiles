@@ -99,12 +99,6 @@ Start a new session and pick a layout:
 - **Terminal resizing** - Automatically adapts to window size changes
 - **Clean UI** - Minimalistic curses interface with unicode box-drawing
 
-## Running without install
-
-```bash
-python -m tail_tiles
-```
-
 ## Tests
 
 ```bash
