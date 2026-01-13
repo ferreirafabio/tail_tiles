@@ -268,10 +268,12 @@ def prompt_setup() -> tuple[list[str], tuple[int, int], int] | None:
                 print(f"       • {p}")
         print(f"    n) New session\n")
 
-        choice = input("  Select [1/2/3/n]: ").strip().lower()
-        if choice in ['1', '2', '3']:
+        # Build prompt based on available sessions
+        options = '/'.join(str(i + 1) for i in range(len(sessions)))
+        choice = input(f"  Select [{options}/n]: ").strip().lower()
+        if choice.isdigit():
             idx = int(choice) - 1
-            if idx < len(sessions):
+            if 0 <= idx < len(sessions):
                 print("\n  Restoring session...")
                 time.sleep(0.3)
                 return load_session(idx)
