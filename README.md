@@ -8,9 +8,17 @@ A minimal, dependency-free (except for tail) Python tool to monitor multiple log
 
 ## Quick start
 
+**From PyPI:**
 ```bash
 pip install tail-tiles
 tail-tiles
+```
+
+**From source:**
+```bash
+git clone https://github.com/ferreirafabio/tail_tiles.git
+cd tail_tiles
+python -m tail_tiles
 ```
 
 That's it. The interactive menu guides you through selecting a layout and file paths.
