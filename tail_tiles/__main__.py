@@ -6,9 +6,11 @@ Controls: +/- adjust lines | r refresh | q quit
 """
 
 import curses
+import json
 import os
 import sys
 import time
+from pathlib import Path
 
 # Layout configurations: (rows, cols)
 LAYOUTS = {
@@ -17,6 +19,9 @@ LAYOUTS = {
     '3': (1, 2),  # 2 horizontal
     '4': (2, 2),  # 2x2 grid
 }
+
+CONFIG_DIR = Path.home() / ".config" / "tail_tiles"
+SESSION_FILE = CONFIG_DIR / "session.json"
 
 
 def read_last_n_lines(filepath: str, n: int) -> list[str]:
@@ -32,6 +37,30 @@ def read_last_n_lines(filepath: str, n: int) -> list[str]:
 def clamp(value: int, min_val: int, max_val: int) -> int:
     """Clamp value between min and max."""
     return max(min_val, min(value, max_val))
+
+
+def save_session(paths: list[str], layout: tuple[int, int], lines: int) -> None:
+    """Save session to config file."""
+    try:
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        SESSION_FILE.write_text(json.dumps({
+            "paths": paths,
+            "layout": list(layout),
+            "lines": lines
+        }))
+    except OSError:
+        pass
+
+
+def load_session() -> tuple[list[str], tuple[int, int], int] | None:
+    """Load session from config file."""
+    try:
+        if not SESSION_FILE.exists():
+            return None
+        data = json.loads(SESSION_FILE.read_text())
+        return data["paths"], tuple(data["layout"]), data["lines"]
+    except (OSError, json.JSONDecodeError, KeyError):
+        return None
 
 
 class TailTile:
@@ -144,6 +173,9 @@ class TileRenderer:
 
 def run_viewer(filepaths: list[str], layout: tuple[int, int], initial_lines: int) -> None:
     """Main curses application loop."""
+    # Save session for restore
+    save_session(filepaths, layout, initial_lines)
+
     def main(stdscr):
         curses.curs_set(0)
         stdscr.timeout(100)
@@ -187,6 +219,22 @@ def run_viewer(filepaths: list[str], layout: tuple[int, int], initial_lines: int
 def prompt_setup() -> tuple[list[str], tuple[int, int], int] | None:
     """Interactive setup prompts."""
     print("\n  \033[1mtail_tiles\033[0m - Multi-file tail viewer\n")
+
+    # Check for existing session
+    session = load_session()
+    if session:
+        paths, layout, lines = session
+        print(f"  Last session: {len(paths)} file(s), {lines} lines")
+        for p in paths:
+            print(f"    • {p}")
+        print()
+        restore = input("  Restore last session? [Y/n]: ").strip().lower()
+        if restore != 'n':
+            print("\n  Restoring session...")
+            time.sleep(0.3)
+            return session
+        print()
+
     print("  Select layout:")
     print("    1) Single file")
     print("    2) 2 files (vertical │)")

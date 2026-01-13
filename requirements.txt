@@ -1,5 +1,0 @@
-# Runtime dependencies: None (uses only Python standard library)
-# The curses module is part of Python's standard library on Linux/macOS
-
-# Development/testing dependencies
-pytest>=7.0.0
