@@ -11,19 +11,36 @@ pip install -e .
 tail-tiles
 ```
 
-That's it. The interactive menu guides you through selecting a layout and file paths:
+That's it. The interactive menu guides you through selecting a layout and file paths.
+
+## Session restore
+
+tail_tiles remembers your last 3 sessions. On startup, quickly restore any previous session:
 
 ```
   tail_tiles - Multi-file tail viewer
 
-  Last session: 2 file(s), 10 lines
-    • /var/log/syslog
-    • /var/log/auth.log
+  Recent sessions:
+    1) 2 file(s), 10 lines
+       • /var/log/syslog
+       • /var/log/auth.log
+    2) 4 file(s), 15 lines
+       • ~/app/logs/error.log
+       • ~/app/logs/access.log
+       • ~/app/logs/debug.log
+       • ~/app/logs/info.log
+    n) New session
 
-  Restore last session? [Y/n]:
+  Select [1/2/n]: 1
+
+  Restoring session...
 ```
 
-Or start fresh and pick a layout:
+Sessions are stored in `~/.config/tail_tiles/sessions.json`.
+
+## Layout selection
+
+Start a new session and pick a layout:
 
 ```
   Select layout:
@@ -60,8 +77,9 @@ Or start fresh and pick a layout:
 
 ## Features
 
-- **Zero dependencies** - Uses only Python 3.10+ standard library (curses)
-- **Session history** - Saves last 3 sessions (`~/.config/tail_tiles/sessions.json`)
+- **Zero dependencies** - Uses only Python 3.10+ standard library (curses, readline)
+- **Session history** - Saves and restores last 3 sessions
+- **Tab completion** - Auto-complete file paths when entering
 - **Live updates** - Polls files for changes (100ms interval)
 - **Flexible layouts** - Single, vertical split, horizontal split, or 2×2 grid
 - **Clean UI** - Minimalistic curses interface with unicode box-drawing
