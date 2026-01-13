@@ -60,7 +60,7 @@ Or start fresh and pick a layout:
 
 ## Features
 
-- **Zero dependencies** - Uses only Python 3.12+ standard library (curses)
+- **Zero dependencies** - Uses only Python 3.10+ standard library (curses)
 - **Session history** - Saves last 3 sessions (`~/.config/tail_tiles/sessions.json`)
 - **Live updates** - Polls files for changes (100ms interval)
 - **Flexible layouts** - Single, vertical split, horizontal split, or 2×2 grid
@@ -96,7 +96,7 @@ python -m pytest tests/ -v
 
 ## Requirements
 
-- Python 3.12+
+- Python 3.10+
 - Linux or macOS (curses is not available on Windows)
 
 ## License
