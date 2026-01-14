@@ -1,7 +1,7 @@
 [project]
 name = "tail_tiles"
-version = "0.2.3"
-description = "Multi-tile tail viewer for terminal in under 250 lines of code"
+version = "0.2.4"
+description = "Multi-tile tail viewer for terminal"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
