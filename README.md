@@ -1,3 +1,6 @@
+[![CI](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml)
+[![PyPI Downloads](https://img.shields.io/pepy/dt/tailgrid)](https://pepy.tech/project/tailgrid)
+
 ```
  ┌──────┬──────┬──────┐
  │ tail │ tail │ tail │   ████████╗ █████╗ ██╗██╗      ██████╗ ██████╗ ██╗██████╗
@@ -9,9 +12,6 @@
 
                            watch multiple files · grid-view · one terminal · zero deps
 ```
-
-[![CI](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml)
-[![PyPI Downloads](https://img.shields.io/pepy/dt/tailgrid)](https://pepy.tech/project/tailgrid)
 
 <img src="tailgrid.png" alt="tailgrid screenshot" width="70%">
 
