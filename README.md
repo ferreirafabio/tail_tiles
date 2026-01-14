@@ -10,7 +10,7 @@
  │ tail │ tail │ tail │      ██║   ██║  ██║██║███████╗╚██████╔╝██║  ██║██║██████╔╝
  └──────┴──────┴──────┘      ╚═╝   ╚═╝  ╚═╝╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚═════╝
 
-                           watch multiple files · grid-view · one terminal · zero deps
+                          watch multiple files · grid-view · one terminal · zero deps
 ```
 
 <img src="tailgrid.png" alt="tailgrid screenshot" width="70%">
@@ -34,9 +34,16 @@ python -m tailgrid
 
 That's it. The interactive menu guides you through selecting files.
 
-## Main menu
+## Viewer controls
 
-No Enter key needed - just press the number:
+| Key | Action |
+|-----|--------|
+| `+` / `=` | Show more lines |
+| `-` / `_` | Show fewer lines |
+| `r` | Force refresh |
+| `q` | Quit |
+
+## Menu
 
 ```
   tailgrid - Multi-file tail viewer
@@ -48,7 +55,7 @@ No Enter key needed - just press the number:
   Select 1-3 (q=quit):
 ```
 
-## Browse directory
+### Browse directory
 
 Select `1` to browse a directory and pick files interactively:
 
@@ -70,24 +77,15 @@ The file picker lets you select multiple files:
  3/9 selected │ ↑↓/jk nav │ SPACE sel │ a all │ ENTER ok │ q quit
 ```
 
-**File picker controls:**
-| Key | Action |
-|-----|--------|
-| `↑`/`↓` or `j`/`k` | Navigate |
-| `Space` | Select/deselect file (moves to next) |
-| `a` | Select/deselect all |
-| `Enter` | Confirm selection |
-| `q` | Cancel |
-
 Layout is auto-selected based on file count:
 - 1 file → Single
 - 2 files → Choose vertical or horizontal
 - 3-4 files → 2×2 grid
 - 5-9 files → 3×3 grid
 
-## Session restore
+### Resume session
 
-Select `3` from main menu to restore one of the last 10 sessions:
+Select `3` from menu to restore one of the last 10 sessions:
 
 ```
   Recent sessions:
@@ -106,7 +104,7 @@ Select `3` from main menu to restore one of the last 10 sessions:
 
 Sessions are stored in `~/.config/tailgrid/sessions.json`.
 
-## Manual layout selection
+### Add paths manually
 
 Select `2` to manually enter paths and pick a layout:
 
@@ -134,15 +132,6 @@ Select `2` to manually enter paths and pick a layout:
   Starting with 4 file(s)...
 ```
 
-## Viewer controls
-
-| Key | Action |
-|-----|--------|
-| `+` / `=` | Show more lines |
-| `-` / `_` | Show fewer lines |
-| `r` | Force refresh |
-| `q` | Quit |
-
 ## Features
 
 - **Zero dependencies** - Uses only Python 3.10+ standard library (curses, readline)
@@ -155,28 +144,6 @@ Select `2` to manually enter paths and pick a layout:
 - **Live updates** - Polls files for changes (100ms interval)
 - **Terminal resizing** - Automatically adapts to window size changes
 - **Clean UI** - Minimalistic curses interface with unicode box-drawing
-
-## Tests
-
-```bash
-pip install -e ".[dev]"
-python -m pytest tests/ -v
-```
-
-## File structure
-
-```
-.
-├── LICENSE
-├── README.md
-├── pyproject.toml
-├── tailgrid
-│   ├── __init__.py         # Package exports
-│   └── __main__.py         # All the code (~244 lines)
-└── tests
-    ├── __init__.py
-    └── test_tailgrid.py    # 21 tests
-```
 
 ## Requirements
 
