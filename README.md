@@ -2,13 +2,12 @@
 [![PyPI Downloads](https://img.shields.io/pepy/dt/tailgrid)](https://pepy.tech/project/tailgrid)
 
 ```
- ┌──────┬──────┬──────┐
- │ tail │ tail │ tail │   ████████╗ █████╗ ██╗██╗      ██████╗ ██████╗ ██╗██████╗
- ├──────┼──────┼──────┤   ╚══██╔══╝██╔══██╗██║██║     ██╔════╝ ██╔══██╗██║██╔══██╗
- │ tail │ tail │ tail │      ██║   ███████║██║██║     ██║  ███╗██████╔╝██║██║  ██║
- ├──────┼──────┼──────┤      ██║   ██╔══██║██║██║     ██║   ██║██╔══██╗██║██║  ██║
- │ tail │ tail │ tail │      ██║   ██║  ██║██║███████╗╚██████╔╝██║  ██║██║██████╔╝
- └──────┴──────┴──────┘      ╚═╝   ╚═╝  ╚═╝╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚═════╝
+ ┌──────┬──────┬──────┐   ████████╗ █████╗ ██╗██╗      ██████╗ ██████╗ ██╗██████╗
+ │ tail │ tail │ tail │   ╚══██╔══╝██╔══██╗██║██║     ██╔════╝ ██╔══██╗██║██╔══██╗
+ ├──────┼──────┼──────┤      ██║   ███████║██║██║     ██║  ███╗██████╔╝██║██║  ██║
+ │ tail │ tail │ tail │      ██║   ██╔══██║██║██║     ██║   ██║██╔══██╗██║██║  ██║
+ └──────┴──────┴──────┘      ██║   ██║  ██║██║███████╗╚██████╔╝██║  ██║██║██████╔╝
+                             ╚═╝   ╚═╝  ╚═╝╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚═════╝
 
                           watch multiple files · grid-view · one terminal · zero deps
 ```
@@ -36,6 +35,11 @@ A minimal, dependency-free Python tool to monitor multiple log files simultaneou
 ```bash
 pip install tailgrid
 tailgrid
+```
+
+**Quick start with path** (auto-selects `.txt` and `.log` files, max 9, newest first):
+```bash
+tailgrid /var/log/
 ```
 
 **From source:**

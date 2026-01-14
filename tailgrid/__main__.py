@@ -225,13 +225,12 @@ def _resume_session():
     except (EOFError, KeyboardInterrupt): print(); return None
 
 LOGO = """
- ┌──────┬──────┬──────┐
- │ tail │ tail │ tail │   ████████╗ █████╗ ██╗██╗      ██████╗ ██████╗ ██╗██████╗
- ├──────┼──────┼──────┤   ╚══██╔══╝██╔══██╗██║██║     ██╔════╝ ██╔══██╗██║██╔══██╗
- │ tail │ tail │ tail │      ██║   ███████║██║██║     ██║  ███╗██████╔╝██║██║  ██║
- ├──────┼──────┼──────┤      ██║   ██╔══██║██║██║     ██║   ██║██╔══██╗██║██║  ██║
- │ tail │ tail │ tail │      ██║   ██║  ██║██║███████╗╚██████╔╝██║  ██║██║██████╔╝
- └──────┴──────┴──────┘      ╚═╝   ╚═╝  ╚═╝╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚═════╝
+ ┌──────┬──────┬──────┐   ████████╗ █████╗ ██╗██╗      ██████╗ ██████╗ ██╗██████╗
+ │ tail │ tail │ tail │   ╚══██╔══╝██╔══██╗██║██║     ██╔════╝ ██╔══██╗██║██╔══██╗
+ ├──────┼──────┼──────┤      ██║   ███████║██║██║     ██║  ███╗██████╔╝██║██║  ██║
+ │ tail │ tail │ tail │      ██║   ██╔══██║██║██║     ██║   ██║██╔══██╗██║██║  ██║
+ └──────┴──────┴──────┘      ██║   ██║  ██║██║███████╗╚██████╔╝██║  ██║██║██████╔╝
+                             ╚═╝   ╚═╝  ╚═╝╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚═════╝
 
                           watch multiple files · grid-view · one terminal · zero deps
 """
@@ -249,8 +248,27 @@ def prompt_setup():
             if result != "back": return result
         except (EOFError, KeyboardInterrupt): print(); return None
 
+def quick_start(directory):
+    """Auto-select .txt and .log files from directory (max 9, newest first)."""
+    directory = os.path.expanduser(directory)
+    if not os.path.isdir(directory): print(f"  Not a directory: {directory}"); return None
+    files = [os.path.join(directory, f) for f in os.listdir(directory)
+             if f.endswith(('.txt', '.log')) and os.path.isfile(os.path.join(directory, f))]
+    if not files: print(f"  No .txt or .log files in: {directory}"); return None
+    files.sort(key=lambda f: os.path.getmtime(f), reverse=True)
+    paths = files[:9]
+    layout = auto_layout(len(paths)) or (2, 1)
+    print(LOGO)
+    print(f"  Found {len(paths)} file(s) in {directory}\n")
+    for p in paths: print(f"    • {os.path.basename(p)}")
+    print("\n  Starting..."); time.sleep(0.3)
+    return paths, layout, 10
+
 def main():
-    result = prompt_setup()
+    if len(sys.argv) > 1:
+        result = quick_start(sys.argv[1])
+    else:
+        result = prompt_setup()
     if result: run_viewer(*result); return 0
     return 1
 
