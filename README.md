@@ -1,11 +1,12 @@
 ```
- ┌─────┬─────┬─────┐
- │ tail│ tail│ tail│   ▀█▀ ▄▀▄ █ █   ▄▀  █▀▄ █ █▀▄
- ├─────┼─────┼─────┤    █  █▀█ █ █   █▀█ █▀▄ █ █ █
- │ tail│ tail│ tail│    █  ▀ ▀ █ █▄▄ ▀▄█ █ █ █ █▄▀
- ├─────┼─────┼─────┤
- │ tail│ tail│ tail│   watch multiple files · one terminal · zero deps
- └─────┴─────┴─────┘
+ ┌───┬───┬───┐
+ │ t │ t │ t │    █████    ███    █████ █       ████  █████  █████ █████
+ ├───┼───┼───┤      █     █   █     █   █      █      █   █    █   █   █
+ │ t │ t │ t │      █     █████     █   █      █  ██  █████    █   █   █
+ ├───┼───┼───┤      █     █   █     █   █      █   █  █  █     █   █   █
+ │ t │ t │ t │      █     █   █   █████ █████   ████  █   █  █████ █████
+ └───┴───┴───┘
+                  watch multiple files · one terminal · zero deps
 ```
 
 [![CI](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml)
