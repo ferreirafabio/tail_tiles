@@ -1,6 +1,7 @@
 # tailgrid
 
 [![CI](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml)
+[![PyPI Downloads](https://img.shields.io/pepy/dt/tailgrid)](https://pepy.tech/project/tailgrid)
 
 <img src="tailgrid.png" alt="tailgrid logo" width="70%">
 
