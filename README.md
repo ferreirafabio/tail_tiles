@@ -5,7 +5,7 @@
 
 <img src="tailgrid.png" alt="tailgrid logo" width="70%">
 
-> Multi-tile tail viewer for terminal in under 280 lines of code
+> Multi-tile tail viewer for terminal in under 250 lines of code
 
 A minimal, dependency-free Python tool to monitor multiple log files simultaneously in a single terminal window. Like `tail -f`, but for up to 9 files at once in a clean tiled layout. Features an interactive file picker and session manager. Tested under Ubuntu and macOS.
 
@@ -163,7 +163,7 @@ python -m pytest tests/ -v
 ├── pyproject.toml
 ├── tailgrid
 │   ├── __init__.py         # Package exports
-│   └── __main__.py         # All the code (~280 lines)
+│   └── __main__.py         # All the code (~244 lines)
 └── tests
     ├── __init__.py
     └── test_tailgrid.py    # 21 tests
