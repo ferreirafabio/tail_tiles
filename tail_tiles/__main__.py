@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 """tail_tiles - Multi-tile tail viewer. Controls: +/- lines | r refresh | q quit"""
 
-import curses, glob, json, os, readline, sys, time
+import curses, glob, json, os, readline, sys, termios, time, tty
 from pathlib import Path
 
 LAYOUTS = {'1': (1, 1), '2': (2, 1), '3': (1, 2), '4': (2, 2), '9': (3, 3)}
-MAX_SESSIONS, CONFIG_DIR = 3, Path.home() / ".config" / "tail_tiles"
+MAX_SESSIONS, CONFIG_DIR = 10, Path.home() / ".config" / "tail_tiles"
 SESSIONS_FILE = CONFIG_DIR / "sessions.json"
+
+def _getch():
+    """Read a single character without waiting for Enter."""
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    try: tty.setraw(fd); return sys.stdin.read(1)
+    finally: termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
 def _setup_readline():
     def completer(text, state):
@@ -162,8 +169,9 @@ def _browse_directory():
         if len(paths) > 9: print(f"\n  Selected {len(paths)} files, using first 9."); paths = paths[:9]
         layout = auto_layout(len(paths))
         if layout is None:  # 2 files - ask user
-            print("\n  2 files selected:  v) Vertical [││]  h) Horizontal [═]")
-            layout = (1, 2) if input("  Layout [v/h]: ").strip().lower() == 'h' else (2, 1)
+            print("\n  2 files selected:  v) Vertical [││]  h) Horizontal [═]  ", end='', flush=True)
+            layout = (1, 2) if _getch().lower() == 'h' else (2, 1)
+            print()
         names = {(1,1): "Single", (2,1): "Vertical", (1,2): "Horizontal", (2,2): "2x2 Grid", (3,3): "3x3 Grid"}
         print(f"\n  {len(paths)} file(s) → {names.get(layout, 'Grid')}")
         for p in paths: print(f"    • {p}")
@@ -171,19 +179,8 @@ def _browse_directory():
         return paths, layout, 10
     except (EOFError, KeyboardInterrupt): print(); return None
 
-def prompt_setup():
-    _setup_readline(); print("\n  \033[1mtail_tiles\033[0m - Multi-file tail viewer\n")
-    sessions = load_sessions()
-    if sessions:
-        print("  Recent sessions:")
-        for i, s in enumerate(sessions):
-            print(f"    {i+1}) {len(s['paths'])} file(s), {s['lines']} lines")
-            for p in s['paths']: print(f"       • {p}")
-    print("    b) Browse directory\n    m) Add paths manually\n")
-    choice = input(f"  Select [{'/'.join(str(i+1) for i in range(len(sessions)))}/b/m]: " if sessions else "  Select [b/m]: ").strip().lower()
-    if sessions and choice.isdigit() and 0 <= int(choice) - 1 < len(sessions):
-        print("\n  Restoring session..."); time.sleep(0.3); return load_session(int(choice) - 1)
-    if choice == 'b': return _browse_directory()
+def _add_paths_manually():
+    _setup_readline()
     print("\n  Select layout:\n")
     print("    1) Single        2) Vertical      3) Horizontal    4) Grid")
     print("       ┌─────┐          ┌──┬──┐          ┌─────┐          ┌──┬──┐")
@@ -191,8 +188,10 @@ def prompt_setup():
     print("       └─────┘          └──┴──┘          ├─────┤          ├──┼──┤")
     print("                                         │  2  │          │ 3│ 4│")
     print("                                         └─────┘          └──┴──┘\n")
+    print("  Layout [1-4]: ", end='', flush=True)
     try:
-        layout = LAYOUTS.get(input("  Layout [1-4]: ").strip(), LAYOUTS['1']); max_files = layout[0] * layout[1]
+        choice = _getch(); print(choice)
+        layout = LAYOUTS.get(choice, LAYOUTS['1']); max_files = layout[0] * layout[1]
         print(f"\n  Enter {max_files} file path(s):\n"); paths = []
         for i in range(max_files):
             path = input(f"    [{i+1}] ").strip()
@@ -203,6 +202,38 @@ def prompt_setup():
             if not os.path.exists(path): print("        ↳ will show when created")
         print(f"\n  Starting with {len(paths)} file(s)..."); time.sleep(0.3)
         return paths, layout, 10
+    except (EOFError, KeyboardInterrupt): print(); return None
+
+def _resume_session():
+    sessions = load_sessions()
+    if not sessions: print("\n  No saved sessions."); time.sleep(0.5); return None
+    print("\n  Recent sessions:\n")
+    for i, s in enumerate(sessions):
+        print(f"    {i}) {len(s['paths'])} file(s), {s['lines']} lines")
+        for p in s['paths']: print(f"       • {p}")
+    print(f"\n  Select [0-{len(sessions)-1}]: ", end='', flush=True)
+    try:
+        choice = _getch(); print(choice)
+        if choice.isdigit() and 0 <= int(choice) < len(sessions):
+            print("\n  Restoring session..."); time.sleep(0.3)
+            return load_session(int(choice))
+        print("\n  Invalid selection."); return None
+    except (EOFError, KeyboardInterrupt): print(); return None
+
+def prompt_setup():
+    print("\n  \033[1mtail_tiles\033[0m - Multi-file tail viewer\n")
+    print("    1) Browse directory")
+    print("    2) Add paths manually")
+    print("    3) Resume session")
+    print("    q) Quit\n")
+    print("  Select [1-3]: ", end='', flush=True)
+    try:
+        choice = _getch(); print(choice)
+        if choice == '1': return _browse_directory()
+        elif choice == '2': return _add_paths_manually()
+        elif choice == '3': return _resume_session()
+        elif choice.lower() == 'q': return None
+        else: print("\n  Invalid selection."); return None
     except (EOFError, KeyboardInterrupt): print(); return None
 
 def main() -> int:

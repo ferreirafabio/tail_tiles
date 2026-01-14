@@ -27,18 +27,26 @@ python -m tail_tiles
 
 That's it. The interactive menu guides you through selecting files.
 
-## Browse directory (new in v0.2.0)
+## Main menu
 
-Select `b` to browse a directory and pick files interactively:
+No Enter key needed - just press the number:
 
 ```
   tail_tiles - Multi-file tail viewer
 
-    b) Browse directory
-    m) Add paths manually
+    1) Browse directory
+    2) Add paths manually
+    3) Resume session
+    q) Quit
 
-  Select [b/m]: b
+  Select [1-3]:
+```
 
+## Browse directory
+
+Select `1` to browse a directory and pick files interactively:
+
+```
   Directory path: /var/log/
 ```
 
@@ -73,33 +81,28 @@ Layout is auto-selected based on file count:
 
 ## Session restore
 
-tail_tiles remembers your last 3 sessions. On startup, quickly restore any previous session:
+Select `3` from main menu to restore one of the last 10 sessions:
 
 ```
-  tail_tiles - Multi-file tail viewer
-
   Recent sessions:
-    1) 2 file(s), 10 lines
+
+    0) 2 file(s), 10 lines
        • /var/log/syslog
        • /var/log/auth.log
-    2) 4 file(s), 15 lines
+    1) 4 file(s), 10 lines
        • ~/app/logs/error.log
        • ~/app/logs/access.log
        • ~/app/logs/debug.log
        • ~/app/logs/info.log
-    b) Browse directory
-    m) Add paths manually
 
-  Select [1/2/b/m]: 1
-
-  Restoring session...
+  Select [0-1]:
 ```
 
 Sessions are stored in `~/.config/tail_tiles/sessions.json`.
 
 ## Manual layout selection
 
-Select `m` to manually enter paths and pick a layout:
+Select `2` to manually enter paths and pick a layout:
 
 ```
   Select layout:
@@ -138,7 +141,8 @@ Select `m` to manually enter paths and pick a layout:
 - **Interactive file picker** - Browse directories and select files with spacebar
 - **Up to 9 tiles** - Support for 3×3 grid layout
 - **Auto-layout** - Automatically picks best layout based on file count
-- **Session history** - Saves and restores last 3 sessions
+- **Session history** - Saves and restores last 10 sessions
+- **Instant menus** - No Enter key needed for menu selections
 - **Tab completion** - Auto-complete file paths when entering manually
 - **Live updates** - Polls files for changes (100ms interval)
 - **Terminal resizing** - Automatically adapts to window size changes
