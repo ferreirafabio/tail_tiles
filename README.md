@@ -1,13 +1,21 @@
-# tailgrid - A grid viewer to monitor multiple files via tail 
+# tailgrid
+
+```
+ ┌─────┬─────┬─────┐
+ │ tail│ tail│ tail│   ▀█▀ ▄▀▄ █ █   ▄▀  █▀▄ █ █▀▄
+ ├─────┼─────┼─────┤    █  █▀█ █ █── █▀█ █▀▄ █ █ █
+ │ tail│ tail│ tail│    █  ▀ ▀ █ █▄▄ ▀▄█ █ █ █ █▄▀
+ ├─────┼─────┼─────┤
+ │ tail│ tail│ tail│   watch multiple files · one terminal · zero deps
+ └─────┴─────┴─────┘
+```
 
 [![CI](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml)
 [![PyPI Downloads](https://img.shields.io/pepy/dt/tailgrid)](https://pepy.tech/project/tailgrid)
 
-<img src="tailgrid.png" alt="tailgrid logo" width="70%">
+<img src="tailgrid.png" alt="tailgrid screenshot" width="70%">
 
-> Multi-tile tail viewer for terminal in under 250 lines of code
-
-A minimal, dependency-free Python tool to monitor multiple log files simultaneously in a single terminal window. Like `tail -f`, but for up to 9 files at once in a clean tiled layout. Features an interactive file picker and session manager. Tested under Ubuntu and macOS.
+A minimal, dependency-free Python tool to monitor multiple log files simultaneously in a single terminal window. Like `tail -f`, but for up to 9 files at once in a clean tiled layout. ~250 lines of code. Tested on Ubuntu and macOS.
 
 ## Quick start
 
