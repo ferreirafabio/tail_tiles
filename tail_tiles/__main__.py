@@ -12,7 +12,11 @@ def _getch():
     """Read a single character without waiting for Enter."""
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
-    try: tty.setraw(fd); return sys.stdin.read(1)
+    try:
+        tty.setraw(fd)
+        ch = sys.stdin.read(1)
+        if ch == '\x03': raise KeyboardInterrupt  # Ctrl+C
+        return ch
     finally: termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
 def _setup_readline():
