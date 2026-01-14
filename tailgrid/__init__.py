@@ -1,6 +1,6 @@
 """tailgrid - Multi-tile tail viewer for terminal."""
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 def __getattr__(name):
     """Lazy import to avoid RuntimeWarning when running as module."""
