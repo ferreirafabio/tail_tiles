@@ -132,19 +132,23 @@ class TailTile:
         except OSError: return 0
 
 class TileRenderer:
-    def __init__(self, stdscr, tiles, layout, show_full_path=False):
+    def __init__(self, stdscr, tiles, layout, show_full_path=False, reasons=None):
         self.stdscr, self.tiles, self.rows, self.cols = stdscr, tiles, layout[0], layout[1]
-        self.focused, self.show_full_path = 0, show_full_path
+        self.focused, self.show_full_path, self.reasons = 0, show_full_path, reasons or {}
     def render(self):
-        self.stdscr.clear(); h, w = self.stdscr.getmaxyx(); tile_h, tile_w = (h - 1) // self.rows, w // self.cols
+        self.stdscr.clear(); h, w = self.stdscr.getmaxyx()
+        ft = self.tiles[self.focused] if self.focused < len(self.tiles) else None
+        focused_reason = self.reasons.get(ft.filepath) if ft else None
+        footer_lines = 2 if focused_reason else 1
+        tile_h, tile_w = (h - footer_lines) // self.rows, w // self.cols
         content_h = tile_h - 2
         for tile in self.tiles:
             if tile.lines != content_h: tile.lines, tile._last_stat = content_h, (0, 0)
         curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
         curses.init_pair(4, curses.COLOR_GREEN, curses.COLOR_BLACK)
         curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+        curses.init_pair(6, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
         for i, tile in enumerate(self.tiles): self._draw_tile(tile, (i // self.cols) * tile_h, (i % self.cols) * tile_w, tile_h, tile_w, i)
-        ft = self.tiles[self.focused] if self.focused < len(self.tiles) else None
         hscroll_str = f" +{ft.h_scroll}" if ft and ft.h_scroll > 0 else ""
         if ft and ft.frozen:
             pos = len(ft._frozen_content) - ft.scroll_offset
@@ -152,7 +156,11 @@ class TileRenderer:
         else:
             total = ft.total_lines() if ft else 0
             status = f" [{self.focused+1}] {total} lines{hscroll_str} │ w: Wrap │ </>: Pan │ Enter: Scroll │ ←→↑↓: Nav │ q: Quit "
-        try: self.stdscr.addstr(h - 1, 0, status[:w-1].ljust(w-1), curses.A_REVERSE)
+        try:
+            if focused_reason:
+                reason_line = f" Claude: {focused_reason}"
+                self.stdscr.addstr(h - 2, 0, reason_line[:w-1].ljust(w-1), curses.color_pair(4))
+            self.stdscr.addstr(h - 1, 0, status[:w-1].ljust(w-1), curses.A_REVERSE)
         except curses.error: pass
         self.stdscr.refresh()
     def _draw_tile(self, tile, y, x, h, w, idx):
@@ -167,7 +175,8 @@ class TileRenderer:
             frozen_mark = " ❄" if tile.frozen else ""
             wrap_mark = " ↩" if tile.wrap else ""
             name = tile.filepath if self.show_full_path else os.path.basename(tile.filepath)
-            name = name[:w-14] + "..." if len(name) > w - 11 else name
+            max_len = w - 11
+            name = "..." + name[-(max_len-3):] if len(name) > max_len else name
             header = f"┌─ {idx+1}:{name}{frozen_mark}{wrap_mark} " + "─" * (w - len(name) - len(frozen_mark) - len(wrap_mark) - 8) + "┐"
             self.stdscr.addstr(y, x, header[:w], border_attr)
             content = tile.get_content()
@@ -195,13 +204,14 @@ class TileRenderer:
             self.stdscr.addstr(y + h - 1, x, "└" + "─" * (w - 2) + "┘", border_attr)
         except curses.error: pass
 
-def run_viewer(filepaths, layout, initial_lines):
+def run_viewer(filepaths, layout, initial_lines, show_full_path=None, reasons=None):
     save_session(filepaths, layout, initial_lines)
     config = load_config()
+    full_path = show_full_path if show_full_path is not None else config.get('show_full_path', False)
     def viewer(stdscr):
         curses.curs_set(0); stdscr.timeout(100)
         tiles = [TailTile(fp, initial_lines) for fp in filepaths]
-        renderer, redraw, last_size = TileRenderer(stdscr, tiles, layout, config.get('show_full_path', False)), True, os.get_terminal_size()
+        renderer, redraw, last_size = TileRenderer(stdscr, tiles, layout, full_path, reasons), True, os.get_terminal_size()
         last_key, last_key_time = None, 0
         for tile in tiles: tile.update()
         while True:
@@ -376,10 +386,70 @@ def quick_start(directory, count=9):
     print("\n  Starting..."); time.sleep(0.3)
     return paths, layout, 10
 
+def claude_discover_paths():
+    """Ask Claude CLI to return relevant session log paths with per-file reasoning."""
+    import subprocess
+    prompt = """Return absolute paths to FILES (max 9) for the most relevant log files to monitor.
+No directories, only files. Consider: your current session, recent experiments, active projects, subagent activity.
+If multiple projects exist, prioritize the most recent or currently running ones.
+Return ONLY existing file paths with a brief description for each.
+The description should be high-level: what project/experiment, what kind of output, why useful to watch.
+Format (one per line):
+/path/to/file.log | Project X - training logs for GPT experiment, shows loss curves
+/path/to/debug.log | Tailgrid dev - debug output from current Claude Code session"""
+    try:
+        result = subprocess.run(['claude', '-p', prompt], capture_output=True, text=True, timeout=60)
+        output = result.stdout.strip()
+        paths, reasons = [], {}
+        for line in output.split('\n'):
+            line = line.strip()
+            if not line or line.startswith('<') or line.startswith('#'):
+                continue
+            if '|' in line:
+                path, reason = line.split('|', 1)
+                path, reason = path.strip(), reason.strip()
+            else:
+                path, reason = line, None
+            if path and os.path.isfile(path):
+                paths.append(path)
+                if reason:
+                    reasons[path] = reason
+        return paths[:9], reasons
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return [], {}
+
 def main():
-    if len(sys.argv) > 1:
-        count = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 9
-        result = quick_start(sys.argv[1], count)
+    if '--claude' in sys.argv:
+        print("  Asking Claude for recent & relevant log paths to show with tailgrid...")
+        paths, reasons = claude_discover_paths()
+        if not paths:
+            print("  No relevant log files found")
+            return 1
+        layout = auto_layout(len(paths)) or (2, 1)
+        print(LOGO)
+        print(f"  Found {len(paths)} log file(s):\n")
+        for p in paths: print(f"    • {p}")
+        print("\n  Starting..."); time.sleep(0.3)
+        run_viewer(paths, layout, 10, show_full_path=True, reasons=reasons)
+        return 0
+    elif len(sys.argv) > 1:
+        first_arg = os.path.expanduser(sys.argv[1])
+        if os.path.isdir(first_arg):
+            # Directory mode - existing behavior
+            count = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 9
+            result = quick_start(sys.argv[1], count)
+        else:
+            # Multiple file paths mode
+            paths = [os.path.expanduser(arg) for arg in sys.argv[1:] if os.path.exists(os.path.expanduser(arg))][:9]
+            if not paths:
+                print("  No valid files provided")
+                return 1
+            layout = auto_layout(len(paths)) or (2, 1)
+            print(LOGO)
+            print(f"  Opening {len(paths)} file(s):\n")
+            for p in paths: print(f"    • {p}")
+            print("\n  Starting..."); time.sleep(0.3)
+            result = (paths, layout, 10)
     else:
         result = prompt_setup()
     if result: run_viewer(*result); return 0

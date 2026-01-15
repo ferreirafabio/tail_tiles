@@ -12,7 +12,7 @@
                           watch multiple files · grid-view · one terminal · zero deps
 ```
 
-<img src="tailgrid-demo.gif?v=3" alt="tailgrid demo" width="100%">
+<img src="tailgrid-demo.gif?v=4" alt="tailgrid demo" width="100%">
 
 A minimal, dependency-free Python tool to monitor multiple log files simultaneously in a single terminal window. Like `tail -f`, but for up to 9 files at once in a clean tiled layout. Tested on Ubuntu and macOS.
 
@@ -20,6 +20,7 @@ A minimal, dependency-free Python tool to monitor multiple log files simultaneou
 
 - **Zero dependencies** — Python 3.10+ standard library only
 - **Quick path** — `tailgrid /path/` auto-selects log files (configurable via `config.json`)
+- **Claude integration** — `tailgrid --claude` lets Claude identify relevant logs to monitor
 - **Up to 9 tiles** — auto-layout, auto-height
 - **Scroll mode** — `Enter` to enter, `↑↓`/`u`/`d`/`gg`/`G` to scroll
 - **Session restore** — saves last 10 sessions
@@ -45,6 +46,24 @@ tailgrid /var/log/ 4     # 4 newest files shown in 2x2 grid
 git clone https://github.com/ferreirafabio/tailgrid.git
 cd tailgrid
 python -m tailgrid
+```
+
+### Claude integration
+
+If you have [Claude Code](https://claude.ai/claude-code) installed, let Claude intelligently select relevant log files:
+
+```bash
+tailgrid --claude
+```
+
+Claude analyzes your current session, recent experiments, and active projects to find the most relevant log files. Each tile shows Claude's reasoning for why it selected that file:
+
+```
+┌─ 1:...server.log ─────────┐┌─ 2:...error.log ────────────┐
+│ [2024-01-15] Starting...  ││ [ERROR] Connection failed   │
+└───────────────────────────┘└─────────────────────────────┘
+ Claude: Production server - main application logs, request handling
+ [1] 42 lines │ w: Wrap │ Enter: Scroll │ ←→↑↓: Nav │ q: Quit
 ```
 
 ## Menu
