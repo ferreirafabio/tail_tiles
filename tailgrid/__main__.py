@@ -9,13 +9,15 @@ MAX_SESSIONS, CONFIG_DIR = 10, Path.home() / ".config" / "tailgrid"
 SESSIONS_FILE, CONFIG_FILE = CONFIG_DIR / "sessions.json", CONFIG_DIR / "config.json"
 DEFAULT_EXTENSIONS = ['.txt', '.log', '.out', '.err']
 
+DEFAULT_CONFIG = {'extensions': DEFAULT_EXTENSIONS, 'show_full_path': False}
+
 def load_config():
     try:
         if CONFIG_FILE.exists():
             cfg = json.loads(CONFIG_FILE.read_text())
-            return cfg.get('extensions', DEFAULT_EXTENSIONS)
+            return {**DEFAULT_CONFIG, **cfg}
     except (OSError, json.JSONDecodeError): pass
-    return DEFAULT_EXTENSIONS
+    return DEFAULT_CONFIG.copy()
 
 def _getch():
     fd, old = sys.stdin.fileno(), termios.tcgetattr(sys.stdin.fileno())
@@ -130,9 +132,9 @@ class TailTile:
         except OSError: return 0
 
 class TileRenderer:
-    def __init__(self, stdscr, tiles, layout):
+    def __init__(self, stdscr, tiles, layout, show_full_path=False):
         self.stdscr, self.tiles, self.rows, self.cols = stdscr, tiles, layout[0], layout[1]
-        self.focused = 0
+        self.focused, self.show_full_path = 0, show_full_path
     def render(self):
         self.stdscr.clear(); h, w = self.stdscr.getmaxyx(); tile_h, tile_w = (h - 1) // self.rows, w // self.cols
         content_h = tile_h - 2
@@ -164,7 +166,8 @@ class TileRenderer:
                 border_attr = curses.A_DIM
             frozen_mark = " ❄" if tile.frozen else ""
             wrap_mark = " ↩" if tile.wrap else ""
-            name = os.path.basename(tile.filepath); name = name[:w-14] + "..." if len(name) > w - 11 else name
+            name = tile.filepath if self.show_full_path else os.path.basename(tile.filepath)
+            name = name[:w-14] + "..." if len(name) > w - 11 else name
             header = f"┌─ {idx+1}:{name}{frozen_mark}{wrap_mark} " + "─" * (w - len(name) - len(frozen_mark) - len(wrap_mark) - 8) + "┐"
             self.stdscr.addstr(y, x, header[:w], border_attr)
             content = tile.get_content()
@@ -194,10 +197,11 @@ class TileRenderer:
 
 def run_viewer(filepaths, layout, initial_lines):
     save_session(filepaths, layout, initial_lines)
+    config = load_config()
     def viewer(stdscr):
         curses.curs_set(0); stdscr.timeout(100)
         tiles = [TailTile(fp, initial_lines) for fp in filepaths]
-        renderer, redraw, last_size = TileRenderer(stdscr, tiles, layout), True, os.get_terminal_size()
+        renderer, redraw, last_size = TileRenderer(stdscr, tiles, layout, config.get('show_full_path', False)), True, os.get_terminal_size()
         last_key, last_key_time = None, 0
         for tile in tiles: tile.update()
         while True:
@@ -359,7 +363,7 @@ def quick_start(directory, count=9):
     """Auto-select log files from directory (newest first). Extensions from config.json."""
     directory = os.path.expanduser(directory)
     if not os.path.isdir(directory): print(f"  Not a directory: {directory}"); return None
-    extensions = tuple(load_config())
+    extensions = tuple(load_config().get('extensions', DEFAULT_EXTENSIONS))
     files = [os.path.join(directory, f) for f in os.listdir(directory)
              if f.endswith(extensions) and os.path.isfile(os.path.join(directory, f))]
     if not files: print(f"  No {'/'.join(extensions)} files in: {directory}"); return None

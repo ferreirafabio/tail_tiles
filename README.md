@@ -110,15 +110,17 @@ Sessions are stored in `~/.config/tailgrid/sessions.json`.
 
 ### Config
 
-Customize quick-start file extensions via `~/.config/tailgrid/config.json`:
+Customize settings via `~/.config/tailgrid/config.json`:
 
 ```json
 {
-  "extensions": [".txt", ".log", ".out", ".err", ".json"]
+  "extensions": [".txt", ".log", ".out", ".err", ".json"],
+  "show_full_path": false
 }
 ```
 
-Default extensions: `.txt`, `.log`, `.out`, `.err`
+- `extensions`: File types for quick-start (default: `.txt`, `.log`, `.out`, `.err`)
+- `show_full_path`: Show full path in tile headers instead of filename (default: `false`)
 
 ### Add paths manually
 
