@@ -1,0 +1,5 @@
+{
+  "extensions": [".txt", ".log", ".out", ".err"],
+  "show_full_path": false,
+  "claude_prompt": "Return absolute paths to FILES (max 9) for the most relevant log files to monitor.\nNo directories, only files. Consider: your current session, recent experiments, active projects, subagent activity.\nIf multiple projects exist, prioritize the most recent or currently running ones.\nReturn ONLY existing file paths with a brief description for each.\nThe description should be high-level: what project/experiment, what kind of output, why useful to watch.\nFormat (one per line):\n/path/to/file.log | Project X - training logs for GPT experiment, shows loss curves\n/path/to/debug.log | Tailgrid dev - debug output from current Claude Code session"
+}
