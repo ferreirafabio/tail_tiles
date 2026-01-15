@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""tailgrid - Multi-tile tail viewer. Controls: +/- lines | r refresh | q quit"""
+"""tailgrid - Multi-tile tail viewer. Controls: Enter scroll | arrows nav | r refresh | q quit"""
 
 import curses, glob, json, os, readline, select, sys, termios, time, tty
 from pathlib import Path
@@ -96,6 +96,7 @@ class TailTile:
     def __init__(self, filepath, lines=10):
         self.filepath, self.lines, self._content, self._last_stat = filepath, lines, [], (0.0, 0)
         self.frozen, self.scroll_offset, self._frozen_content = False, 0, []
+        self.h_scroll, self.wrap = 0, False  # Horizontal scroll offset and wrap toggle
     def update(self):
         if self.frozen: return False
         try: stat = os.stat(self.filepath); current = (stat.st_mtime, stat.st_size)
@@ -142,12 +143,13 @@ class TileRenderer:
         curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)
         for i, tile in enumerate(self.tiles): self._draw_tile(tile, (i // self.cols) * tile_h, (i % self.cols) * tile_w, tile_h, tile_w, i)
         ft = self.tiles[self.focused] if self.focused < len(self.tiles) else None
+        hscroll_str = f" +{ft.h_scroll}" if ft and ft.h_scroll > 0 else ""
         if ft and ft.frozen:
             pos = len(ft._frozen_content) - ft.scroll_offset
-            status = f" SCROLL [{self.focused+1}] line {pos}/{len(ft._frozen_content)} │ ↑↓ u/d gg/G: Scroll │ Enter: Exit │ q: Quit "
+            status = f" SCROLL [{self.focused+1}] line {pos}/{len(ft._frozen_content)}{hscroll_str} │ ↑↓: Scroll │ ←→: Pan │ w: Wrap │ Enter: Exit │ q: Quit "
         else:
             total = ft.total_lines() if ft else 0
-            status = f" [{self.focused+1}] {total} lines │ Enter: Scroll mode │ ←→↑↓: Nav │ q: Quit "
+            status = f" [{self.focused+1}] {total} lines{hscroll_str} │ w: Wrap │ </>: Pan │ Enter: Scroll │ ←→↑↓: Nav │ q: Quit "
         try: self.stdscr.addstr(h - 1, 0, status[:w-1].ljust(w-1), curses.A_REVERSE)
         except curses.error: pass
         self.stdscr.refresh()
@@ -161,14 +163,31 @@ class TileRenderer:
             else:
                 border_attr = curses.A_DIM
             frozen_mark = " ❄" if tile.frozen else ""
-            name = os.path.basename(tile.filepath); name = name[:w-12] + "..." if len(name) > w - 9 else name
-            header = f"┌─ {idx+1}:{name}{frozen_mark} " + "─" * (w - len(name) - len(frozen_mark) - 8) + "┐"
+            wrap_mark = " ↩" if tile.wrap else ""
+            name = os.path.basename(tile.filepath); name = name[:w-14] + "..." if len(name) > w - 11 else name
+            header = f"┌─ {idx+1}:{name}{frozen_mark}{wrap_mark} " + "─" * (w - len(name) - len(frozen_mark) - len(wrap_mark) - 8) + "┐"
             self.stdscr.addstr(y, x, header[:w], border_attr)
             content = tile.get_content()
+            content_w = w - 3  # Width available for content (minus borders and padding)
+            # Build display lines (with wrapping or horizontal scroll)
+            display_lines = []
+            for line in content:
+                if tile.wrap:
+                    # Wrap long lines
+                    if len(line) <= content_w:
+                        display_lines.append(line)
+                    else:
+                        for i in range(0, len(line), content_w):
+                            display_lines.append(line[i:i+content_w])
+                else:
+                    # Apply horizontal scroll
+                    display_lines.append(line[tile.h_scroll:] if tile.h_scroll < len(line) else "")
+            # Take last N lines that fit
+            display_lines = display_lines[-(h-2):]
             for row in range(h - 2):
                 if y + 1 + row >= y + h - 1: break
                 self.stdscr.addstr(y + 1 + row, x, "│", border_attr)
-                if row < len(content): self.stdscr.addstr(y + 1 + row, x + 1, f" {content[row]}"[:w-3])
+                if row < len(display_lines): self.stdscr.addstr(y + 1 + row, x + 1, f" {display_lines[row]}"[:w-3])
                 self.stdscr.addstr(y + 1 + row, x + w - 1, "│", border_attr)
             self.stdscr.addstr(y + h - 1, x, "└" + "─" * (w - 2) + "┘", border_attr)
         except curses.error: pass
@@ -209,10 +228,12 @@ def run_viewer(filepaths, layout, initial_lines):
                 else: renderer.focused = (renderer.focused + renderer.cols) % len(tiles)
                 redraw = True
             elif key == curses.KEY_LEFT:
-                if not ft.frozen: renderer.focused = (renderer.focused - 1) % len(tiles)
+                if ft.frozen: ft.h_scroll = max(0, ft.h_scroll - 10)
+                else: renderer.focused = (renderer.focused - 1) % len(tiles)
                 redraw = True
             elif key == curses.KEY_RIGHT:
-                if not ft.frozen: renderer.focused = (renderer.focused + 1) % len(tiles)
+                if ft.frozen: ft.h_scroll += 10
+                else: renderer.focused = (renderer.focused + 1) % len(tiles)
                 redraw = True
             elif key == ord('j'): ft.scroll(-1); redraw = True
             elif key == ord('k'): ft.scroll(1); redraw = True
@@ -223,6 +244,9 @@ def run_viewer(filepaths, layout, initial_lines):
                 if last_key == ord('g') and now - last_key_time < 0.5: ft.scroll_top(); redraw = True
                 last_key, last_key_time = key, now
             elif key == ord('G'): ft.scroll_bottom(); redraw = True
+            elif key == ord('w'): ft.wrap = not ft.wrap; ft.h_scroll = 0; redraw = True
+            elif key in (ord('<'), ord(',')): ft.h_scroll = max(0, ft.h_scroll - 10); redraw = True
+            elif key in (ord('>'), ord('.')): ft.h_scroll += 10; redraw = True
             elif key in range(ord('1'), ord('1') + len(tiles)):
                 renderer.focused = key - ord('1'); redraw = True
             elif key == curses.KEY_RESIZE: curses.update_lines_cols(); stdscr.erase(); redraw = True
