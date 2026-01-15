@@ -21,3 +21,13 @@ build/
 *.swp
 *.swo
 .claude/
+
+# Demo recording
+*demo*.py
+*demo*.sh
+record*.py
+record*.sh
+send_keys.sh
+*.cast
+node_modules/
+package*.json
