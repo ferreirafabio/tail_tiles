@@ -127,7 +127,7 @@ Select `3` from menu to restore one of the last 10 sessions:
 
 Sessions are stored in `~/.config/tailgrid/sessions.json`.
 
-### Config
+## Config
 
 Customize settings via `~/.config/tailgrid/config.json`:
 
