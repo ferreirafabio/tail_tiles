@@ -1,5 +1,5 @@
 [![CI](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/ferreirafabio/tailgrid/actions/workflows/ci.yml)
-[![PyPI Downloads](https://img.shields.io/pepy/dt/tailgrid)](https://pepy.tech/project/tailgrid)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/tailgrid?period=total&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/tailgrid)
 
 ```
  ┌──────┬──────┬──────┐   ████████╗ █████╗ ██╗██╗      ██████╗ ██████╗ ██╗██████╗
